@@ -19,20 +19,28 @@
     {% block body %}
         <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
             <div class="navbar-header">
-                <a class="navbar-brand" href="#">µBlog</a>
+                <a class="navbar-brand" href="{{ url_for('index') }}">µBlog</a>
             </div>
             <ul class="nav navbar-nav">
-                <li><a href="#">Link</a></li>
                 {% if page.prev %}
                 <li><a href="{{ url_for('index', start=page.prev) }}">Previous</a></li>
                 {% endif %}
                 {% if page.next %}
                 <li><a href="{{ url_for('index', start=page.next) }}">Next</a></li>
+                {% endif %}
             </ul>
             <div class="navbar-right">
+                {% if session.username %}
+                <p class="navbar-text">
+                    Hey, {{ session.username }}
+                </p>
+                {% endif %}
                 <ul class="nav navbar-nav">
-                    {% endif %}
+                    {% if session.username %}
                     <li><a href="{{ url_for('logout') }}">Logout</a>
+                    {% else %}
+                    <li><a href="{{ url_for('login') }}">Login</a>
+                    {% endif %}
                 </ul>
             </div>
         </nav>
