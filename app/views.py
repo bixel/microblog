@@ -1,16 +1,11 @@
-from flask import (
-    Flask,
-    g,
-    render_template,
-    request,
-    make_response,
-    redirect,
-    url_for,
-    session,
-)
+import os
+from flask import g, render_template, request, make_response, redirect, url_for, session
 import flaskext.couchdb as couchdb
 import datetime
+from werkzeug.utils import secure_filename
 from app import app
+
+ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'txt']
 
 manager = couchdb.CouchDBManager()
 
@@ -56,6 +51,10 @@ class Post(couchdb.Document):
     author_user_id = couchdb.TextField()
     text = couchdb.TextField()
     created = couchdb.DateTimeField(default=datetime.datetime.now)
+    filename = couchdb.TextField()
+
+    def get_file(self):
+        return 'img/upload/' + self.filename
 
     all_posts_view = couchdb.ViewField(
         'Post',
@@ -71,12 +70,14 @@ class Post(couchdb.Document):
 
 manager.add_document(Post)
 
+
 def validate_user(username, password):
     user = User.load(username)
     if user != None and user.check_password(password):
         return user
 
     return None
+
 
 def get_error_message():
     from flask import session
@@ -86,6 +87,13 @@ def get_error_message():
         return error_message
 
     return None
+
+
+def allowed_file(filename):
+    """ Check fileextension
+    """
+    return ('.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS)
+
 
 @app.route('/', methods=['GET'])
 def index():
@@ -107,9 +115,16 @@ def new_post():
     if username == None:
         session['error_message'] = 'You need to log in before posting.'
         return redirect(url_for('index'))
-    if request.method == 'POST' and username != None:
+
+    if request.method == 'POST':
         new_post = Post(author_user_id=username, text=request.form['text'])
+        file = request.files['file']
         new_post.store()
+        if file and allowed_file(file.filename):
+            filename = secure_filename(str(new_post.id) + '-' + file.filename)
+            new_post.filename = filename
+            new_post.store()
+            file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
         response = make_response(redirect(url_for('index')))
         return response
 

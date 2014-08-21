@@ -1,9 +1,8 @@
 <html>
 <body>
-    <form action="{{ url_for('new_post') }}" method="post">
-        <textarea name="text">
-
-        </textarea>
+    <form action="{{ url_for('new_post') }}" enctype="multipart/form-data" method="post">
+        <textarea name="text"></textarea><br>
+        <input type="file" name="file"><br>
         <button type="submit">YAY</button>
     </form>
 </body>

@@ -21,6 +21,9 @@
             <li>
                 <div>
                     {{ post.text }}
+                    {% if post.filename != None %}
+                    <img src="{{ url_for('static', filename=post.get_file()) }}">
+                    {% endif %}
                     <span style="color: #ccc;">{{ post.author_user_id }}</span><br>
                     <span style="color: #ccc;">{{ post.created }}</span>
                 </div>
