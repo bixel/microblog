@@ -5,6 +5,9 @@
     {% else %}
         <title>Welcome to microblog</title>
     {% endif %}
+    <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+    {% block script %}
+    {% endblock %}
     </head>
     <body>
     {% block body %}
@@ -22,7 +25,10 @@
                 <div>
                     {{ post.text }}
                     {% if post.filename != None %}
-                    <img src="{{ url_for('static', filename=post.get_file()) }}">
+                    <img style="max-width: 200px;" src="{{ url_for('static', filename=post.get_file()) }}">
+                    {% endif %}
+                    {% if post.image != None %}
+                    <img style="max-width: 200px;" src="{{ post.image }}">
                     {% endif %}
                     <span style="color: #ccc;">{{ post.author_user_id }}</span><br>
                     <span style="color: #ccc;">{{ post.created }}</span>

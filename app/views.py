@@ -52,6 +52,7 @@ class Post(couchdb.Document):
     text = couchdb.TextField()
     created = couchdb.DateTimeField(default=datetime.datetime.now)
     filename = couchdb.TextField()
+    image = couchdb.TextField()
 
     def get_file(self):
         return 'img/upload/' + self.filename
@@ -118,13 +119,9 @@ def new_post():
 
     if request.method == 'POST':
         new_post = Post(author_user_id=username, text=request.form['text'])
-        file = request.files['file']
+        new_post.image = request.form['file']
+        print('someone posted something')
         new_post.store()
-        if file and allowed_file(file.filename):
-            filename = secure_filename(str(new_post.id) + '-' + file.filename)
-            new_post.filename = filename
-            new_post.store()
-            file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
         response = make_response(redirect(url_for('index')))
         return response
 
