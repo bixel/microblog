@@ -1,0 +1,35 @@
+<html>
+    <head>
+    {% if title %}
+        <title>{{title}} - microblog</title>
+    {% else %}
+        <title>Welcome to microblog</title>
+    {% endif %}
+    </head>
+    <body>
+    {% block body %}
+        {% if error_message != None %}
+            {{ error_message }}
+        {% endif %}
+        <h1>Sommerakademie 2014</h1>
+        {% if session %}
+        <h3>Hallo, {{ session.username }}</h3>
+        {% endif %}
+        <ul>
+        {% block content %}
+        {% for post in page.items %}
+            <li>
+                <div>
+                    {{ post.text }}
+                    <span style="color: #ccc;">{{ post.author_user_id }}</span><br>
+                    <span style="color: #ccc;">{{ post.created }}</span>
+                </div>
+            </li>
+        {% endfor %}
+        </ul>
+        {% if page.prev %}<a href="{{ url_for('index', start=page.prev) }}">Previous</a>{% endif %}
+        {% if page.next %}<a href="{{ url_for('index', start=page.next) }}">Next</a>{% endif %}
+        {% endblock %}
+    {% endblock %}
+    </body>
+</html>
