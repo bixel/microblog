@@ -11,10 +11,10 @@ $(document).ready(function(){
         var file = e.target.files[0];
         console.log(file);
         $.canvasResize(file, {
-                    width: 300,
-                    height: 0,
+                    width: 800,
+                    height: 800,
                     crop: false,
-                    quality: 80,
+                    quality: 100,
                     callback: function(data, width, height) {
                         resized_data = data;
                     }
