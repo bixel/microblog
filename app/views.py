@@ -147,7 +147,7 @@ def login():
 @app.route('/logout/')
 def logout():
     session.clear()
-    resp = make_response(redirect(url_for('login')))
+    resp = make_response(redirect(url_for('index')))
     return resp
 
 @app.route('/register/', methods=['GET', 'POST'])
