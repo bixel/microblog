@@ -65,6 +65,7 @@
             $last_div = $divs.last();
             if($last_div.attr("data-next")){
                 next_id = $last_div.attr("data-next");
+                console.log(next_id);
                 $last_div.attr("data-next", "");
                 $new_div = $last_div.clone().insertAfter($last_div);
                 $new_div.find("img").attr("src", "{{ url_for('static', filename='img/9gag-loading-small.gif') }}");
@@ -109,11 +110,16 @@
             });
             event.preventDefault();
         });
-    })
+    });
+
+    function refresh(){
+        $first_post = $("div.post").first();
+    }
     </script>
     {% endblock %}
     </head>
     <body>
+    {{ first_post }}
     {% block body %}
     <div class="container">
         <nav class="navbar navbar-default navbar-fixed-top" role="navigation">

@@ -100,6 +100,7 @@ def allowed_file(filename):
 def index():
     username = (session['username'] if 'username' in session else None)
     user = (g.couch.get(username) if username != None else None)
+    # first_post = Post.all_posts_view[0]
     page = couchdb.paginate(Post.all_posts_view, 5, start=request.args.get("start"))
     error_message = get_error_message()
     return render_template(
@@ -108,10 +109,14 @@ def index():
         user = user,
         page = page,
         error_message = error_message,
+    #    first_post = first_post,
     )
 
 @app.route('/json/', methods=['GET'])
 def json():
+    """ Return a single Post, packed in JSON.
+        If no ?post parameter is passed, 
+    """
     if not 'post' in request.args:
         abort(404)
 
