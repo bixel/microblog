@@ -60,8 +60,8 @@ class Post(couchdb.Document):
         'Post',
         '''\
         function (doc) {
-            if (doc.text){
-                emit(doc.created, doc);
+            if (doc.doc_type == 'Post'){
+                emit([doc.created, doc.id], doc);
             }
         };
         ''',
@@ -113,13 +113,14 @@ def index():
 def new_post():
     username = (session['username'] if 'username' in session else None)
     if username == None:
-        session['error_message'] = 'You need to log in before posting.'
-        return redirect(url_for('index'))
+        abort(401)
 
     if request.method == 'POST':
-        new_post = Post(author_user_id=username, text=request.form['text'])
-        new_post.image = request.form['file']
-        print('someone posted something')
+        new_post = Post(author_user_id=username)
+        if('text' in request.form):
+            new_post.text = request.form['text']
+        if('file' in request.form):
+            new_post.image = request.form['file']
         new_post.store()
         response = make_response(redirect(url_for('index')))
         return response

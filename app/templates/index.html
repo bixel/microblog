@@ -13,6 +13,9 @@
     <script src="{{ url_for('static', filename='jquery-2.1.1.min.js') }}"></script>
     <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
     {% block script %}
+    <script src="{{ url_for('static', filename='binaryajax.js') }}"></script>
+    <script src="{{ url_for('static', filename='jquery.canvasResize.js') }}"></script>
+    <script src="{{ url_for('static', filename='jquery.exif.js') }}"></script>
     <script>
     $(document).ready(function(){
         $("#login-form").submit(function(){
@@ -29,7 +32,36 @@
                 $("#login-modal-error").addClass("in");
             });
             event.preventDefault();
-        })
+        });
+
+        var resized_data;
+        $('input[name=photo]').change(function(e) {
+            $("#new-post-modal-image").attr("src", "{{ url_for('static', filename="img/9gag-loading-small.gif") }}");
+            var file = e.target.files[0];
+            console.log(file);
+            $.canvasResize(file, {
+                        width: 800,
+                        height: 800,
+                        crop: false,
+                        quality: 100,
+                        callback: function(data, width, height) {
+                            resized_data = data;
+                            $("#new-post-modal-image").attr("src", data);
+                        }
+            });
+        });
+
+        $("#new-post-form").submit(function(){
+            $.post("{{ url_for('new_post') }}", {
+                'text': $("textarea").val(),
+                'file': resized_data,
+            }).done(function(data){
+                window.location.replace("{{ url_for('index') }}");
+            }).fail(function(){
+                alert('Upload failed...');
+            });
+            event.preventDefault();
+        });
     })
     </script>
     {% endblock %}
@@ -41,6 +73,9 @@
                 <a class="navbar-brand" href="{{ url_for('index') }}">µBlog</a>
             </div>
             <ul class="nav navbar-nav">
+                {% if session.username %}
+                <li><a href="#" role="button" data-toggle="modal" data-target="#new-post-modal">+</a></li>
+                {% endif %}
                 {% if page.prev %}
                 <li><a href="{{ url_for('index', start=page.prev) }}">Previous</a></li>
                 {% endif %}
@@ -64,6 +99,8 @@
             </div>
         </nav>
 
+        {# MODALS #}
+        {# Login #}
         <div id="login-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-sm">
                 <div class="modal-content">
@@ -88,6 +125,42 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                             <button type="submit" class="btn btn-primary">Login</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {# New Post #}
+        <div id="new-post-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" id="login-modal-label">Whazaaap??</h4>
+                    </div>
+                    <form role="form" id="new-post-form">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="text">Erzähl:</label>
+                                <textarea id="new-post-modal-text" class="form-control" name="text"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="file">Mit Fotto?</label>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <input type="file" class="form-control" name="photo">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <img id="new-post-modal-image" style="max-width: 100%;" class="img-rounded" src="">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">GO!</button>
                         </div>
                     </form>
                 </div>
