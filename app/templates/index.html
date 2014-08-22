@@ -14,12 +14,25 @@
             padding-top: 70px;
         }
 
+        div.post-meta {
+            font-size: 14px;
+            color: #CCC;
+        }
+
+        p.text {
+            font-size: 18px;
+        }
+
         p.right {
             float: right;
         }
 
         p.left {
             float: left;
+        }
+
+        img.img-post {
+            max-width: 80%;
         }
     </style>
     <script src="{{ url_for('static', filename='jquery-2.1.1.min.js') }}"></script>
@@ -69,7 +82,7 @@
         })
 
         var resized_data;
-        $('input[name=photo]').change(function() {
+        $('input[name=photo]').change(function(e) {
             $("#new-post-modal-image").attr("src", "{{ url_for('static', filename='img/9gag-loading-small.gif') }}");
             var file = e.target.files[0];
             console.log(file);
@@ -209,7 +222,7 @@
         {% for post in page.items %}
         <div class="row">
             <div id="post-{{ post.id }}" {% if loop.first %}data-prev="{{ page.prev|urlencode }}"{% elif loop.last %}data-next="{{ page.next|urlencode }}"{% endif %} class="col-xs-12 col-sm-10 col-md-7 post">
-                <div>
+                <div class="post-meta">
                     <p class="author left">{{ post.author_user_id }}</p>
                     <p class="date right">{{ post.created }}</p>
                 </div>
@@ -217,7 +230,7 @@
                 <p class="text">{{ post.text }}</p>
                 {% if post.image %}
                 <center>
-                <img style="max-width: 100%; max-height: 70%;" src="{{ post.image }}" class="img-rounded">
+                <img src="{{ post.image }}" class="img-post img-rounded">
                 </center>
                 {% endif %}
                 <hr>
