@@ -54,6 +54,13 @@ class Post(couchdb.Document):
     filename = couchdb.TextField()
     image = couchdb.TextField()
 
+    def page(self):
+        """ Try to clone the paginate format: [["2014-08-22T14:21:00Z", null], "676b4679cdcd56b936a8735022015bbd"]
+        """
+        from flask import json
+        dump = json.dumps([[self.created.isoformat() + "Z", None], self.id])
+        return dump
+
     def get_file(self):
         return 'img/upload/' + self.filename
 
@@ -100,7 +107,6 @@ def allowed_file(filename):
 def index():
     username = (session['username'] if 'username' in session else None)
     user = (g.couch.get(username) if username != None else None)
-    # first_post = Post.all_posts_view[0]
     page = couchdb.paginate(Post.all_posts_view, 5, start=request.args.get("start"))
     error_message = get_error_message()
     return render_template(
@@ -109,7 +115,6 @@ def index():
         user = user,
         page = page,
         error_message = error_message,
-    #    first_post = first_post,
     )
 
 @app.route('/json/', methods=['GET'])
@@ -117,19 +122,22 @@ def json():
     """ Return a single Post, packed in JSON.
         If no ?post parameter is passed, 
     """
-    if not 'post' in request.args:
-        abort(404)
+    if 'post' in request.args:
+        page = couchdb.paginate(Post.all_posts_view, 1, start=request.args.get('post'))
+        print(page.prev)
+        post = page.items[0]
+        return jsonify(
+            username=escape(post.author_user_id),
+            text=escape(post.text),
+            image=post.image,
+            next=(quote(page.next) if page.next else ''),
+            previous=(quote(page.prev) if page.prev else ''),
+            created=post.created,
+            id=post.id,
+            this=quote(post.page()),
+        )
 
-    page = couchdb.paginate(Post.all_posts_view, 1, start=request.args.get('post'))
-    post = page.items[0]
-    return jsonify(
-        username=escape(post.author_user_id),
-        text=escape(post.text),
-        image=post.image,
-        next=(quote(page.next) if page.next else ''),
-        previous=(quote(page.prev) if page.next else ''),
-        created=post.created,
-    )
+    abort(404)
 
 
 @app.route('/newpost/', methods=['GET', 'POST'])
