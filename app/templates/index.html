@@ -1,10 +1,12 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
-    {% if title %}
-        <title>{{title}} - microblog</title>
-    {% else %}
-        <title>Welcome to microblog</title>
-    {% endif %}
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        {% if title %}
+            <title>{{title}} - microblog</title>
+        {% else %}
+            <title>Welcome to microblog</title>
+        {% endif %}
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
     <style type="text/css">
@@ -18,7 +20,7 @@
     <script src="{{ url_for('static', filename='jquery.exif.js') }}"></script>
     <script>
     $(document).ready(function(){
-        $("#login-form").submit(function(){
+        $("#login-form").submit(function(event){
             $.post("{{ url_for('login') }}", {
                 'username': $("#login-modal-username").val(),
                 'password': $("#login-modal-password").val(),
@@ -35,7 +37,7 @@
         });
 
         var resized_data;
-        $('input[name=photo]').change(function(e) {
+        $('input[name=photo]').change(function() {
             $("#new-post-modal-image").attr("src", "{{ url_for('static', filename="img/9gag-loading-small.gif") }}");
             var file = e.target.files[0];
             console.log(file);
@@ -51,7 +53,7 @@
             });
         });
 
-        $("#new-post-form").submit(function(){
+        $("#new-post-form").submit(function(event){
             $.post("{{ url_for('new_post') }}", {
                 'text': $("textarea").val(),
                 'file': resized_data,
@@ -68,6 +70,7 @@
     </head>
     <body>
     {% block body %}
+    <div class="container">
         <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
             <div class="navbar-header">
                 <a class="navbar-brand" href="{{ url_for('index') }}">µBlog</a>
@@ -170,25 +173,16 @@
         {% if error_message != None %}
             {{ error_message }}
         {% endif %}
-        <ul>
         {% block content %}
         {% for post in page.items %}
-            <li>
-                <div>
-                    {{ post.text }}
-                    {% if post.filename != None %}
-                    <img style="max-width: 200px; max-height: 200px;" src="{{ url_for('static', filename=post.get_file()) }}">
-                    {% endif %}
-                    {% if post.image != None %}
-                    <img style="max-width: 200px; max-height: 200px;" src="{{ post.image }}">
-                    {% endif %}
-                    <span style="color: #ccc;">{{ post.author_user_id }}</span><br>
-                    <span style="color: #ccc;">{{ post.created }}</span>
-                </div>
-            </li>
+        <div class="row">
+            <div id="post-{{ post.id }}" class="col-xs-12 col-md-4">
+                {{ post.text }}
+            </div>
+        </div>
         {% endfor %}
-        </ul>
         {% endblock %}
     {% endblock %}
+    </div>
     </body>
 </html>
