@@ -24,6 +24,9 @@
                 $("#login-modal").on("hidden.bs.modal", function(){
                     window.location.replace("{{ url_for('index') }}");
                 });
+            }).fail(function(){
+                $("#login-modal-error").removeClass("hidden");
+                $("#login-modal-error").addClass("in");
             });
             event.preventDefault();
         })
@@ -77,6 +80,9 @@
                             <div class="form-group">
                                 <label for="password">Password</label>
                                 <input id="login-modal-password" class="form-control" type="password" name="password" placeholder="Password">
+                            </div>
+                            <div class="alert alert-danger fade hidden" id="login-modal-error" role="alert">
+                                Yo! Check da pwd, bro!
                             </div>
                         </div>
                         <div class="modal-footer">

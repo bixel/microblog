@@ -1,5 +1,5 @@
 import os
-from flask import g, render_template, request, make_response, redirect, url_for, session
+from flask import g, render_template, request, make_response, redirect, url_for, session, abort
 import flaskext.couchdb as couchdb
 import datetime
 from werkzeug.utils import secure_filename
@@ -137,12 +137,8 @@ def login():
             resp = make_response(redirect(url_for('index')))
             session['username'] = user.username
             return resp
-        else:
-            return "Badass you are!"
-    else:
-        return render_template(
-            'login.html',
-        )
+        abort(401)
+    return render_template('login.html')
 
 @app.route('/logout/')
 def logout():
