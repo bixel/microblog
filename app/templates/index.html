@@ -10,7 +10,7 @@
     <style type="text/css">
         body { padding-top: 70px; }
     </style>
-    <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="{{ url_for('static', filename='jquery-2.1.1.min.js') }}"></script>
     <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
     {% block script %}
     {% endblock %}
