@@ -40,7 +40,6 @@ class User(couchdb.Document):
         encryption formats behind the scenes.
         """
         algo, salt, hsh = self.password.split('$')
-        print(salt, raw_password)
         return hsh == self.sha1hash(salt, raw_password)
 
 manager.add_document(User)
