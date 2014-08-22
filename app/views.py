@@ -1,7 +1,8 @@
 import os
-from flask import g, render_template, request, make_response, redirect, url_for, session, abort
+from flask import g, render_template, request, make_response, redirect, url_for, session, abort, jsonify, escape
 import flaskext.couchdb as couchdb
 import datetime
+from urllib.parse import quote
 from werkzeug.utils import secure_filename
 from app import app
 
@@ -99,7 +100,7 @@ def allowed_file(filename):
 def index():
     username = (session['username'] if 'username' in session else None)
     user = (g.couch.get(username) if username != None else None)
-    page = couchdb.paginate(Post.all_posts_view, 10, start=request.args.get("start"))
+    page = couchdb.paginate(Post.all_posts_view, 5, start=request.args.get("start"))
     error_message = get_error_message()
     return render_template(
         "index.html",
@@ -108,6 +109,23 @@ def index():
         page = page,
         error_message = error_message,
     )
+
+@app.route('/json/', methods=['GET'])
+def json():
+    if not 'post' in request.args:
+        abort(404)
+
+    page = couchdb.paginate(Post.all_posts_view, 1, start=request.args.get('post'))
+    post = page.items[0]
+    return jsonify(
+        username=escape(post.author_user_id),
+        text=escape(post.text),
+        image=post.image,
+        next=(quote(page.next) if page.next else ''),
+        previous=(quote(page.prev) if page.next else ''),
+        created=post.created,
+    )
+
 
 @app.route('/newpost/', methods=['GET', 'POST'])
 def new_post():
