@@ -54,6 +54,7 @@ class Post(couchdb.Document):
     created = couchdb.DateTimeField(default=datetime.datetime.now)
     filename = couchdb.TextField()
     image = couchdb.TextField()
+    deleted = couchdb.BooleanField(default=False)
 
     def page(self):
         """ Try to clone the paginate format: [["2014-08-22T14:21:00Z", null], "676b4679cdcd56b936a8735022015bbd"]
@@ -69,7 +70,7 @@ class Post(couchdb.Document):
         'Post',
         '''\
         function (doc) {
-            if (doc.doc_type == 'Post'){
+            if (doc.doc_type == 'Post' && !doc.deleted){
                 emit([doc.created, doc.id], doc);
             }
         };
@@ -155,6 +156,24 @@ def new_post():
         return response
 
     return render_template("new_post.html")
+
+
+@app.route('/post/', methods=['POST'])
+def post():
+    if('id' in request.form):
+        post = Post.load(request.form['id'])
+        if('hide' in request.form and request.form['hide'] == 'True'):
+            if(post.author_user_id != session["username"]):
+                abort(401)
+
+            post.deleted = True
+        post.store()
+        flash('Post deleted successfully', 'info')
+        return 'post updated'
+
+    flash('Something went wrong...', 'error')
+    abort(404)
+
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():

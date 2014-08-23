@@ -46,6 +46,13 @@
     var refresh_timeout;
 
     $(document).ready(function(){
+        var username = "{{ session.username }}";
+
+        $("button.delete-post").on("click", function(){
+            var post_id = $(this).attr("data-target");
+            hidePost(post_id);
+        });
+
         $("#login-form").submit(function(event){
             $.post("{{ url_for('login') }}", {
                 'username': $("#login-modal-username").val(),
@@ -85,6 +92,16 @@
                     $new_div.find("p.date").html(dateFormat(date));
                     $new_div.find("p.text").html(data["text"]);
                     $new_div.attr("id", data["id"]);
+                    if(data["username"] == username){
+                        $new_div.find("div.post-control").removeClass("hidden");
+                        $new_div.find("button.delete-post").attr("data-target", data["id"]);
+                        $new_div.find("button.delete-post").on("click", function(){
+                            var post_id = $(this).attr("data-target");
+                            hidePost(post_id);
+                        });
+                    } else {
+                        $new_div.find("div.post-control").addClass("hidden");
+                    }
                 });
             }
         });
@@ -146,6 +163,12 @@
                     $new_div.find("p.text").html(new_data["text"]);
                     $new_div.attr("id", new_data["id"]);
                     $new_div.attr("data-this", new_data["this"]);
+                    if(data["username"] == username){
+                        $new_div.find("div.post-control").removeClass("hidden");
+                        $new_div.find("button.delete-post").attr("data-target", data["id"]);
+                    } else {
+                        $new_div.find("div.post-control").addClass("hidden");
+                    }
                 }).done(function(){
                     refresh();
                 })
@@ -155,6 +178,21 @@
             refresh_timeout = setTimeout(refresh, parseInt($("#auto-refresh-value").val(), 10) * 1000);
         }
     }
+
+
+    function hidePost(postId){
+        $.post("{{ url_for('post') }}", {
+            'id': postId,
+            'hide': 'True',
+        }).done(function(){
+            $("div.post#" + postId).fadeOut(600, "swing", function(){
+                $(this).remove();
+            });
+        }).fail(function(){
+            alert("Woops, somethign went wrong. Give Kevin a hug.");
+        });
+    }
+
 
     function dateFormat(date){
         var date_string = "";
@@ -303,6 +341,9 @@
         {% for post in page.items %}
         <div class="row">
             <div id="{{ post.id }}" data-this="{{ post.page()|urlencode }}" {% if loop.first %}data-prev="{{ page.prev|urlencode }}"{% elif loop.last %}data-next="{{ page.next|urlencode }}"{% endif %} class="col-xs-12 col-sm-10 col-md-7 post" data-appear-top-offset="600">
+                <div class="post-control {% if post.author_user_id != session.username %}hidden{% endif %}">
+                    <button type="button" data-target="{{ post.id }}" class="btn btn-default btn-xs delete-post">X</button>
+                </div>
                 <div class="post-meta">
                     <p class="author left">{{ post.author_user_id }}</p>
                     <p class="date right">{{ post.created }}</p>
