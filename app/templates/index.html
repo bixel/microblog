@@ -73,7 +73,7 @@
                 $new_div.find("p.text").html("...");
                 $.getJSON("{{ url_for('json') }}?post=" + next_id, function(data){
                     $new_div.attr("data-next", data["next"]);
-                    if(data["image"] == ""){
+                    if(!data["image"]){
                         $new_div.find("img.post-img").addClass("hidden");
                     } else {
                         $new_div.find("img.post-img").attr("src", data["image"]);
@@ -136,7 +136,9 @@
                     $new_div.find("p.text").html(new_data["text"]);
                     $new_div.attr("id", new_data["id"]);
                     $new_div.attr("data-this", new_data["this"]);
-                });
+                }).done(function(){
+                    refresh();
+                })
             }
         });
     }
