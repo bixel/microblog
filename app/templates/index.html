@@ -34,6 +34,10 @@
         img.post-img {
             max-width: 80%;
         }
+
+        button.delete-post {
+            float: right;
+        }
     </style>
     <script src="{{ url_for('static', filename='jquery-2.1.1.min.js') }}"></script>
     <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
@@ -52,6 +56,8 @@
             var post_id = $(this).attr("data-target");
             hidePost(post_id);
         });
+
+        $("button.delete-post").tooltip();
 
         $("#login-form").submit(function(event){
             $.post("{{ url_for('login') }}", {
@@ -99,6 +105,7 @@
                             var post_id = $(this).attr("data-target");
                             hidePost(post_id);
                         });
+                        $new_div.find("button.delete-post").tooltip();
                     } else {
                         $new_div.find("div.post-control").addClass("hidden");
                     }
@@ -166,6 +173,11 @@
                     if(data["username"] == username){
                         $new_div.find("div.post-control").removeClass("hidden");
                         $new_div.find("button.delete-post").attr("data-target", data["id"]);
+                        $new_div.find("button.delete-post").on("click", function(){
+                            var post_id = $(this).attr("data-target");
+                            hidePost(post_id);
+                        });
+                        $new_div.find("button.delete-post").tooltip();
                     } else {
                         $new_div.find("div.post-control").addClass("hidden");
                     }
@@ -342,8 +354,9 @@
         <div class="row">
             <div id="{{ post.id }}" data-this="{{ post.page()|urlencode }}" {% if loop.first %}data-prev="{{ page.prev|urlencode }}"{% elif loop.last %}data-next="{{ page.next|urlencode }}"{% endif %} class="col-xs-12 col-sm-10 col-md-7 post" data-appear-top-offset="600">
                 <div class="post-control {% if post.author_user_id != session.username %}hidden{% endif %}">
-                    <button type="button" data-target="{{ post.id }}" class="btn btn-default btn-xs delete-post">X</button>
+                    <button type="button" data-target="{{ post.id }}" class="btn btn-default btn-xs delete-post" data-toggle="tooltip" data-placement="top" title="Delete this Post! You can't undo this (yet).">X</button>
                 </div>
+                <div class="clearfix"></div>
                 <div class="post-meta">
                     <p class="author left">{{ post.author_user_id }}</p>
                     <p class="date right">{{ post.created }}</p>
