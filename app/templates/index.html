@@ -43,6 +43,8 @@
     <script src="{{ url_for('static', filename='jquery.exif.js') }}"></script>
     <script src="{{ url_for('static', filename='jquery.appear.js') }}"></script>
     <script>
+    var refresh_timeout;
+
     $(document).ready(function(){
         $("#login-form").submit(function(event){
             $.post("{{ url_for('login') }}", {
@@ -116,7 +118,13 @@
             event.preventDefault();
         });
 
-        setInterval(refresh, 10000);
+        refresh_timeout = setTimeout(refresh, parseInt($("#auto-refresh-value").val(), 10) * 1000);
+        $("#auto-refresh-checkbox").on("change", function(){
+            clearTimeout(refresh_timeout);
+            if($("#auto-refresh-checkbox").prop("checked")){
+                refresh();
+            };
+        });
     });
 
     function refresh(){
@@ -143,6 +151,9 @@
                 })
             }
         });
+        if($("#auto-refresh-checkbox").prop("checked")){
+            refresh_timeout = setTimeout(refresh, parseInt($("#auto-refresh-value").val(), 10) * 1000);
+        }
     }
 
     function dateFormat(date){
@@ -178,18 +189,27 @@
                 {% endif %}
             </ul>
             <div class="navbar-right">
-                {% if session.username %}
-                <p class="navbar-text">
-                    Hey, {{ session.username }}
-                </p>
-                {% endif %}
-                <ul class="nav navbar-nav">
+                <div class="navbar-right">
                     {% if session.username %}
-                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
-                    {% else %}
-                    <li><a role="button" href="#" data-toggle="modal" data-target="#login-modal">Login</a></li>
+                    <p class="navbar-text">
+                        Hey, {{ session.username }}
+                    </p>
                     {% endif %}
-                </ul>
+                    <ul class="nav navbar-nav">
+                        {% if session.username %}
+                        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                        {% else %}
+                        <li><a role="button" href="#" data-toggle="modal" data-target="#login-modal">Login</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="navbar-form navbar-right">
+                    <div class="form-group">
+                        <label for="auto-refresh"><small>Auto-Refresh</small></label>
+                        <input name="auto-refresh" id="auto-refresh-checkbox" type="checkbox" value="true" checked="checked">
+                        <input type="text" class="form-control input-sm" id="auto-refresh-value" value="30" maxlength="3" size="1">
+                    </div>
+                </div>
             </div>
         </nav>
 
