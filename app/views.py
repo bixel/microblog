@@ -1,5 +1,5 @@
 import os
-from flask import g, render_template, request, make_response, redirect, url_for, session, abort, jsonify, escape
+from flask import g, render_template, request, make_response, redirect, url_for, session, abort, jsonify, escape, flash
 import flaskext.couchdb as couchdb
 import datetime
 from urllib.parse import quote
@@ -16,6 +16,7 @@ class User(couchdb.Document):
     username = couchdb.TextField()
     displayname = couchdb.TextField()
     password = couchdb.TextField()
+    relationship = couchdb.TextField()
 
     def sha1hash(self, salt, string):
         """ Generate sha1 hash from salt+string
@@ -105,14 +106,11 @@ def allowed_file(filename):
 
 @app.route('/', methods=['GET'])
 def index():
-    username = (session['username'] if 'username' in session else None)
-    user = (g.couch.get(username) if username != None else None)
     page = couchdb.paginate(Post.all_posts_view, 5, start=request.args.get("start"))
     error_message = get_error_message()
     return render_template(
         "index.html",
         title = 'Home',
-        user = user,
         page = page,
         error_message = error_message,
     )
@@ -120,7 +118,7 @@ def index():
 @app.route('/json/', methods=['GET'])
 def json():
     """ Return a single Post, packed in JSON.
-        If no ?post parameter is passed, 
+        If no ?post parameter is passed,
     """
     if 'post' in request.args:
         page = couchdb.paginate(Post.all_posts_view, 1, start=request.args.get('post'))
@@ -201,10 +199,29 @@ def create_user():
 
 @app.route('/profile/', methods=['GET', 'POST'])
 def profile():
-    if request.method == 'POST':
-        return 'you posted something...'
+    if not 'username' in session:
+        abort(401)
 
-    return render_template('profile.html')
+    username = session['username']
+    user = User.load(username)
+    if request.method == 'POST':
+        user.displayname = request.form["displayname"]
+        user.relationship = request.form["relationship"]
+        password = request.form["password"]
+        password_check = request.form["password-check"]
+        if(password != ''):
+            if password == password_check:
+                user.set_password(password)
+                flash('Password updated', 'info')
+            else:
+                flash('Is this your first password-form-thing? Type them twice, yo!', 'error')
+        user.store()
+        response = make_response(redirect(url_for('profile')))
+
+    return render_template(
+        'profile.html',
+        user=user
+    )
 
 manager.setup(app)
 manager.sync(app)

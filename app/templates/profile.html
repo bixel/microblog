@@ -1,4 +1,48 @@
 {% extends "index.html" %}
+
 {% block content %}
-Profileinstellungen
+<form class="form-horizontal" action="{{ url_for('profile') }}" method="POST">
+    <div class="form-group">
+        <label class="col-md-2 control-label" for="username">Username</label>
+        <div class="col-md-4">
+            <input class="form-control" type="text" name="username" placeholder="new Username" value="{{ user.username }}" disabled="disabled">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-md-2 control-label" for="displayname">Displayname</label>
+        <div class="col-md-4">
+            <input class="form-control" type="text" name="displayname" placeholder="new Displayname" value="{% if user.displayname %}{{ user.displayname }}{% endif %}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-md-2 control-label" for="password">Password</label>
+        <div class="col-md-4">
+            <input class="form-control" type="password" name="password" placeholder="new Password">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-md-2 control-label" for="password-check"></label>
+        <div class="col-md-4">
+            <input class="form-control" type="password" name="password-check" placeholder="retype new Password">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-md-2 control-label" for="relationship">Relationship</label>
+        <div class="col-md-4">
+            <select name="relationship" class="form-control">
+                <option value="single" {% if user.relationship == 'single' %}selected="selected"{% endif %}>Single</option>
+                <option value="relationship" {% if user.relationship == 'relationship' %}selected="selected"{% endif %}>In a relationship</option>
+                <option value="married" {% if user.relationship == 'married' %}selected="selected"{% endif %}>Married</option>
+                <option value="complicated" {% if user.relationship == 'complicated' %}selected="selected"{% endif %}>It's complicated</option>
+                <option value="fap" {% if user.relationship == 'fap' %}selected="selected"{% endif %}>I've got a Notebook ♥︎</option>
+                <option value="what" {% if user.relationship == 'what' %}selected="selected"{% endif %}>What relationship?︎</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-4">
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </div>
+</form>
 {% endblock %}

@@ -135,7 +135,7 @@
                 $.getJSON("{{ url_for('json') }}?post=" + data["previous"], function(new_data){
                     $new_div = $first_post.clone();
                     $new_div.insertBefore($first_post);
-                    if(new_data["image"] == ""){
+                    if(new_data["image"]){
                         $new_div.find("img.post-img").addClass("hidden");
                     } else {
                         $new_div.find("img.post-img").attr("src", new_data["image"]);
@@ -187,6 +187,7 @@
                 {% endif %}
             </div>
             <div class="collapse navbar-collapse" id="navbar-collapse">
+                {% if page %}
                 <ul class="nav navbar-nav">
                     {% if page.prev %}
                     <li><a href="{{ url_for('index', start=page.prev) }}">Previous</a></li>
@@ -194,6 +195,7 @@
                     {% if page.next %}
                     <li><a href="{{ url_for('index', start=page.next) }}">Next</a></li>
                     {% endif %}
+                {% endif %}
                 </ul>
                 <div class="navbar-right">
                     <div class="navbar-right">
@@ -204,6 +206,7 @@
                         {% endif %}
                         <ul class="nav navbar-nav">
                             {% if session.username %}
+                            <li><a href="{{ url_for('profile') }}">Profil</a></li>
                             <li><a href="{{ url_for('logout') }}">Logout</a></li>
                             {% else %}
                             <li><a role="button" href="#" data-toggle="modal" data-target="#login-modal">Login</a></li>
@@ -289,9 +292,13 @@
             </div>
         </div>
 
-        {% if error_message != None %}
-            {{ error_message }}
-        {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+                <div>{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+        {% endwith %}
         {% block content %}
         {% for post in page.items %}
         <div class="row">
