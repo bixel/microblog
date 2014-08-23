@@ -78,8 +78,9 @@
                     } else {
                         $new_div.find("img.post-img").attr("src", data["image"]);
                     }
+                    var date = new Date(data["created"]);
                     $new_div.find("p.author").html(data["username"]);
-                    $new_div.find("p.date").html(data["created"]);
+                    $new_div.find("p.date").html(dateFormat(date));
                     $new_div.find("p.text").html(data["text"]);
                     $new_div.attr("id", data["id"]);
                 });
@@ -132,7 +133,8 @@
                         $new_div.find("img.post-img").attr("src", new_data["image"]);
                     }
                     $new_div.find("p.author").html(new_data["username"]);
-                    $new_div.find("p.date").html(new_data["created"]);
+                    var date = new Date(data["created"]);
+                    $new_div.find("p.date").html(dateFormat(date));
                     $new_div.find("p.text").html(new_data["text"]);
                     $new_div.attr("id", new_data["id"]);
                     $new_div.attr("data-this", new_data["this"]);
@@ -141,6 +143,17 @@
                 })
             }
         });
+    }
+
+    function dateFormat(date){
+        var date_string = "";
+        date_string += date.getFullYear().toString() + "-";
+        date_string += (date.getMonth() + 1).toString() + "-";
+        date_string += date.getDate().toString() + " ";
+        date_string += date.getHours().toString() + ":";
+        date_string += date.getMinutes().toString() + ":";
+        date_string += date.getSeconds().toString();
+        return date_string;
     }
     </script>
     {% endblock %}
@@ -254,7 +267,7 @@
         {% block content %}
         {% for post in page.items %}
         <div class="row">
-            <div id="{{ post.id }}" data-this="{{ post.page()|urlencode }}" {% if loop.first %}data-prev="{{ page.prev|urlencode }}"{% elif loop.last %}data-next="{{ page.next|urlencode }}"{% endif %} class="col-xs-12 col-sm-10 col-md-7 post">
+            <div id="{{ post.id }}" data-this="{{ post.page()|urlencode }}" {% if loop.first %}data-prev="{{ page.prev|urlencode }}"{% elif loop.last %}data-next="{{ page.next|urlencode }}"{% endif %} class="col-xs-12 col-sm-10 col-md-7 post" data-appear-top-offset="600">
                 <div class="post-meta">
                     <p class="author left">{{ post.author_user_id }}</p>
                     <p class="date right">{{ post.created }}</p>
