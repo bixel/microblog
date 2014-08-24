@@ -8,7 +8,7 @@ from urllib.parse import quote
 from werkzeug.utils import secure_filename
 from app import app
 
-ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'txt']
+ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png']
 
 manager = couchdb.CouchDBManager()
 
