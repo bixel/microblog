@@ -25,13 +25,8 @@
             color: #CCC;
         }
 
-        div.text {
+        p.text {
             font-size: 18px;
-        }
-
-        div.text p {
-            margin: 0px;
-            padding: 0px;
         }
 
         p.right {
@@ -373,7 +368,7 @@
                     <p class="date right">{{ post.created }}</p>
                 </div>
                 <div class="clearfix"></div>
-                <div class="text">{{ post.text|nl2br }}</div>
+                <p class="text">{{ post.text|nl2br }}</p>
                 <center>
                 <img src="{% if post.image %}{{ post.image }}{% endif %}" class="post-img img-rounded {% if not post.image %}hidden{% endif %}">
                 </center>
