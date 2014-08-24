@@ -66,6 +66,8 @@
         $("button.delete-post").tooltip();
 
         $("#login-form").submit(function(event){
+            $(this).find(".btn-loading").addClass("hidden");
+            $(this).find(".img-loading").removeClass("hidden");
             $.post("{{ url_for('login') }}", {
                 'username': $("#login-modal-username").val(),
                 'password': $("#login-modal-password").val(),
@@ -77,6 +79,8 @@
             }).fail(function(){
                 $("#login-modal-error").removeClass("hidden");
                 $("#login-modal-error").addClass("in");
+                $(this).find(".btn-loading").removeClass("hidden");
+                $(this).find(".img-loading").addClass("hidden");
             });
             event.preventDefault();
         });
@@ -137,6 +141,8 @@
         });
 
         $("#new-post-form").submit(function(event){
+            $(this).find(".btn-loading").addClass("hidden");
+            $(this).find(".img-loading").removeClass("hidden");
             $.post("{{ url_for('new_post') }}", {
                 'text': $("textarea").val(),
                 'file': resized_data,
@@ -144,6 +150,8 @@
                 window.location.replace("{{ url_for('index') }}");
             }).fail(function(){
                 alert('Upload failed...');
+                $(this).find(".btn-loading").removeClass("hidden");
+                $(this).find(".img-loading").addClass("hidden");
             });
             event.preventDefault();
         });
@@ -305,7 +313,8 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Login</button>
+                            <button type="submit" class="btn btn-primary btn-loading">Login</button>
+                            <img src="{{ url_for('static', filename='img/9gag-loading-small.gif') }}" class="img-rounded hidden img-loading">
                         </div>
                     </form>
                 </div>
@@ -341,7 +350,8 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">GO!</button>
+                            <button type="submit" class="btn btn-primary btn-loading">GO!</button>
+                            <img src="{{ url_for('static', filename='img/9gag-loading-small.gif') }}" class="img-rounded hidden img-loading">
                         </div>
                     </form>
                 </div>

@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 import os
 import re
 from jinja2 import evalcontextfilter, Markup, escape
 from flask import g, render_template, request, make_response, redirect, url_for, session, abort, jsonify, escape, flash
 import flaskext.couchdb as couchdb
 import datetime
-from urllib.parse import quote
+from urllib import quote
 from werkzeug.utils import secure_filename
 from app import app
 
