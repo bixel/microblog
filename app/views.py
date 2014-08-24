@@ -1,4 +1,6 @@
 import os
+import re
+from jinja2 import evalcontextfilter, Markup, escape
 from flask import g, render_template, request, make_response, redirect, url_for, session, abort, jsonify, escape, flash
 import flaskext.couchdb as couchdb
 import datetime
@@ -79,6 +81,17 @@ class Post(couchdb.Document):
     )
 
 manager.add_document(Post)
+
+# Custom jinja filter nl2br
+_paragraph_re = re.compile(r'(?:\r\n|\r|\n){2,}')
+@app.template_filter()
+@evalcontextfilter
+def nl2br(eval_ctx, value):
+    result = u'\n\n'.join(u'%s<br>' % p.replace('\n', '<br>\n') \
+        for p in _paragraph_re.split(escape(value)))
+    if eval_ctx.autoescape:
+        result = Markup(result)
+    return result
 
 
 def validate_user(username, password):
@@ -240,6 +253,18 @@ def profile():
     return render_template(
         'profile.html',
         user=user
+    )
+
+
+@app.route('/debug/', methods=['GET'])
+def debug():
+    if not 'username' in session or session['username'] != 'bixel':
+        abort(401)
+
+    page = couchdb.paginate(Post.all_posts_view, 1)
+    return render_template(
+        'debug.txt',
+        page=page
     )
 
 manager.setup(app)

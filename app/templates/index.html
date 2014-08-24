@@ -362,7 +362,7 @@
                     <p class="date right">{{ post.created }}</p>
                 </div>
                 <div class="clearfix"></div>
-                <p class="text">{{ post.text }}</p>
+                <p class="text">{{ post.text|nl2br }}</p>
                 <center>
                 <img src="{% if post.image %}{{ post.image }}{% endif %}" class="post-img img-rounded {% if not post.image %}hidden{% endif %}">
                 </center>
