@@ -58,6 +58,7 @@ class Post(couchdb.Document):
     filename = couchdb.TextField()
     image = couchdb.TextField()
     deleted = couchdb.BooleanField(default=False)
+    likes = couchdb.TextField(default="")
 
     def page(self):
         """ Try to clone the paginate format: [["2014-08-22T14:21:00Z", null], "676b4679cdcd56b936a8735022015bbd"]
@@ -68,6 +69,18 @@ class Post(couchdb.Document):
 
     def get_file(self):
         return 'img/upload/' + self.filename
+
+    def like(self, username=""):
+        """THIS IS COMPLETLY BUGGY SHIT
+        """
+        likes = unicode(self.likes).split(u'-')
+        if username != "":
+            if username not in likes:
+                likes.append(username)
+            else:
+                likes.remove(username)
+            self.likes = u'-'.join(likes)
+        return len(likes) - 1
 
     all_posts_view = couchdb.ViewField(
         'Post',
@@ -147,9 +160,25 @@ def json():
             created=post.created,
             id=post.id,
             this=quote(post.page()),
+            likes=post.like(),
         )
 
     abort(404)
+
+
+@app.route('/like/', methods=['POST'])
+def like():
+    if not 'username' in session:
+        abort(401)
+
+    post = Post.load(request.form['id'])
+    print(session['username'])
+    print(post.likes)
+    likes = post.like(session['username'])
+    post.store()
+    return jsonify(
+        likes=likes
+    )
 
 
 @app.route('/newpost/', methods=['GET', 'POST'])
@@ -262,9 +291,14 @@ def debug():
         abort(401)
 
     page = couchdb.paginate(Post.all_posts_view, 1)
+    post = Post.load(page.items[0].id)
+    print(post.like(request.args.get("like")))
+    post.store()
+    print(post.likes)
     return render_template(
         'debug.txt',
-        page=page
+        page=page,
+        likes=post.likes,
     )
 
 manager.setup(app)

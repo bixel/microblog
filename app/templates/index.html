@@ -25,6 +25,19 @@
             color: #CCC;
         }
 
+        div.post-likes {
+            font-size: 16px;
+            color: #405060;
+        }
+
+        p.likes {
+            margin-right: 5px;
+        }
+
+        button.btn-like {
+            float: right;
+        }
+
         p.text {
             font-size: 18px;
         }
@@ -57,6 +70,8 @@
 
     $(document).ready(function(){
         var username = "{{ session.username }}";
+
+        $("button.btn-like").on("click", like);
 
         $("button.delete-post").on("click", function(){
             var post_id = $(this).attr("data-target");
@@ -108,6 +123,9 @@
                     $new_div.find("p.date").html(dateFormat(date));
                     $new_div.find("p.text").html(data["text"]);
                     $new_div.attr("id", data["id"]);
+                    $new_div.find("button.btn-like").attr("data-target", data["id"]);
+                    $new_div.find("button.btn-like").on("click", like);
+                    $new_div.find("p.likes").html(data["likes"]);
                     if(data["username"] == username){
                         $new_div.find("div.post-control").removeClass("hidden");
                         $new_div.find("button.delete-post").attr("data-target", data["id"]);
@@ -127,7 +145,6 @@
         $('input[name=photo]').change(function(e) {
             $("#new-post-modal-image").attr("src", "{{ url_for('static', filename='img/9gag-loading-small.gif') }}");
             var file = e.target.files[0];
-            console.log(file);
             $.canvasResize(file, {
                         width: 800,
                         height: 800,
@@ -165,6 +182,20 @@
         });
     });
 
+    function like(){
+        var id = $(this).attr("data-target");
+        var $parent = $(this).parent();
+        var $btn = $(this);
+        $.post('{{ url_for("like") }}', {
+            'id': id,
+        }, function(data){
+            var likes = data["likes"];
+            $parent.find("p.likes").html(likes);
+        }, 'json').fail(function(){
+            alert("something went wrong :/ I need [coffe, beer]!");
+        });
+    }
+
     function refresh(){
         $first_post = $("div.post").first();
         var paginate_index = $first_post.attr("data-this");
@@ -184,6 +215,9 @@
                     $new_div.find("p.text").html(new_data["text"]);
                     $new_div.attr("id", new_data["id"]);
                     $new_div.attr("data-this", new_data["this"]);
+                    $new_div.find("button.btn-like").attr("data-target", data["id"]);
+                    $new_div.find("button.btn-like").on("click", like);
+                    $new_div.find("p.likes").html(data["likes"]);
                     if(data["username"] == username){
                         $new_div.find("div.post-control").removeClass("hidden");
                         $new_div.find("button.delete-post").attr("data-target", data["id"]);
@@ -382,6 +416,13 @@
                 <center>
                 <img src="{% if post.image %}{{ post.image }}{% endif %}" class="post-img img-rounded {% if not post.image %}hidden{% endif %}">
                 </center>
+                <div class="post-like">
+                    <button type="button" class="btn btn-default btn-xs btn-like" data-target="{{ post.id }}">
+                        LIKE
+                    </button>
+                    <p class="right likes">{{ post.like() }}</p>
+                </div>
+                <div class="clearfix"></div>
                 <hr>
             </div>
         </div>
