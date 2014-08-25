@@ -420,6 +420,7 @@
                 <center>
                 <img src="{% if post.image %}{{ post.image }}{% endif %}" class="post-img img-rounded {% if not post.image %}hidden{% endif %}">
                 </center>
+                {% if session.username %}
                 <div class="post-like">
                     <button type="button" class="btn btn-default btn-xs btn-like" data-target="{{ post.id }}">
                         LIKE
@@ -427,6 +428,7 @@
                     <p class="right likes">{{ post.like() }}</p>
                 </div>
                 <div class="clearfix"></div>
+                {% endif %}
                 <hr>
             </div>
         </div>
