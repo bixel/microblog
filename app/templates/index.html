@@ -158,17 +158,21 @@
         });
 
         $("#new-post-form").submit(function(event){
-            $(this).find(".btn-loading").addClass("hidden");
-            $(this).find(".img-loading").removeClass("hidden");
+            var $btn = $(this).find(".btn-loading");
+            var $img = $(this).find(".img-loading");
+            $btn.addClass("hidden");
+            $img.removeClass("hidden");
+            var now = new Date();
             $.post("{{ url_for('new_post') }}", {
                 'text': $("textarea").val(),
                 'file': resized_data,
+                'created': now.getTime(),
             }).done(function(data){
                 window.location.replace("{{ url_for('index') }}");
             }).fail(function(){
                 alert('Upload failed...');
-                $(this).find(".btn-loading").removeClass("hidden");
-                $(this).find(".img-loading").addClass("hidden");
+                $btn.removeClass("hidden");
+                $img.addClass("hidden");
             });
             event.preventDefault();
         });

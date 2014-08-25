@@ -193,6 +193,9 @@ def new_post():
             new_post.text = request.form['text']
         if('file' in request.form):
             new_post.image = request.form['file']
+        if('created' in request.form):
+            print(request.form['created'])
+            new_post.created = datetime.datetime.fromtimestamp(float(request.form['created']) / 1000)
         new_post.store()
         response = make_response(redirect(url_for('index')))
         return response
