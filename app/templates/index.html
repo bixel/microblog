@@ -81,8 +81,10 @@
         $("button.delete-post").tooltip();
 
         $("#login-form").submit(function(event){
-            $(this).find(".btn-loading").addClass("hidden");
-            $(this).find(".img-loading").removeClass("hidden");
+            var $btn = $(this).find(".btn-loading");
+            var $img = $(this).find(".img-loading");
+            $btn.addClass("hidden");
+            $img.removeClass("hidden");
             $.post("{{ url_for('login') }}", {
                 'username': $("#login-modal-username").val(),
                 'password': $("#login-modal-password").val(),
@@ -94,8 +96,8 @@
             }).fail(function(){
                 $("#login-modal-error").removeClass("hidden");
                 $("#login-modal-error").addClass("in");
-                $(this).find(".btn-loading").removeClass("hidden");
-                $(this).find(".img-loading").addClass("hidden");
+                $btn.removeClass("hidden");
+                $img.addClass("hidden");
             });
             event.preventDefault();
         });
