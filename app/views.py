@@ -133,6 +133,9 @@ def allowed_file(filename):
 
 @app.route('/', methods=['GET'])
 def index():
+    if not 'username' in session:
+        response = make_response(redirect(url_for('login')))
+        return response
     page = couchdb.paginate(Post.all_posts_view, 5, start=request.args.get("start"))
     error_message = get_error_message()
     return render_template(
