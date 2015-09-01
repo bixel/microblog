@@ -1,0 +1,16 @@
+#posts-container {
+    margin-top: 65px;
+}
+
+.card .img {
+    text-align: center;
+}
+
+.card .buttons {
+    text-align: right;
+}
+
+.card img {
+    width: 100%;
+    max-height: 400px;
+}

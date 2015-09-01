@@ -1,22 +1,30 @@
-from peewee import (SqliteDatabase,
-                    Model,
-                    CharField,
-                    DateTimeField,
-                    BooleanField,
-                    ForeignKeyField)
-import os
+#! /usr/bin/env python3
+from peewee import(SqliteDatabase,
+                   TextField,
+                   CharField,
+                   ForeignKeyField,
+                   BooleanField,
+                   DateTimeField,
+                   Model)
+import config
 import datetime
 
-DBPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                      'database.sqlite')
-db = SqliteDatabase(DBPATH)
+
+db = SqliteDatabase(config.DATABASE_PATH)
+
+
+class Relationship(Model):
+    title = CharField()
+
+    class Meta:
+        database = db
 
 
 class User(Model):
-    username = CharField()
+    username = CharField(unique=True)
     displayname = CharField()
     password = CharField()
-    relationship = CharField()
+    relationship = ForeignKeyField(Relationship)
 
     def sha1hash(self, salt, string):
         """ Generate sha1 hash from salt+string
@@ -44,26 +52,16 @@ class User(Model):
         algo, salt, hsh = self.password.split('$')
         return hsh == self.sha1hash(salt, raw_password)
 
+    class Meta:
+        database = db
+
 
 class Post(Model):
+    text = TextField()
     author = ForeignKeyField(User)
-    text = CharField()
-    created = DateTimeField(default=datetime.datetime.now)
-    filename = CharField()
+    created = DateTimeField(datetime.datetime.now)
     image = CharField()
-    deleted = BooleanField(default=False)
-
-    def page(self):
-        """ Try to clone the paginate format:
-            [["2014-08-22T14:21:00Z", null],
-            "676b4679cdcd56b936a8735022015bbd"]
-        """
-        from flask import json
-        dump = json.dumps([[self.created.isoformat() + "Z", None], self.id])
-        return dump
-
-    def get_file(self):
-        return 'img/upload/' + self.filename
+    visible = BooleanField(default=True)
 
     class Meta:
         database = db
@@ -75,3 +73,6 @@ class Likes(Model):
 
     class Meta:
         database = db
+
+
+db.connect()
