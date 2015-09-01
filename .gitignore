@@ -2,6 +2,8 @@ app/config.py
 include/
 app/static/img/upload
 
+db.sqlite
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
