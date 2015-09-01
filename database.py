@@ -6,6 +6,7 @@ from peewee import(SqliteDatabase,
                    BooleanField,
                    DateTimeField,
                    Model)
+from playhouse.shortcuts import model_to_dict
 import config
 import datetime
 
@@ -13,18 +14,26 @@ import datetime
 db = SqliteDatabase(config.DATABASE_PATH)
 
 
-class Relationship(Model):
+class BaseModel(Model):
+    def to_dict(self):
+        return model_to_dict(self)
+
+    class Meta:
+        database = db
+
+
+class Relationship(BaseModel):
     title = CharField()
 
     class Meta:
         database = db
 
 
-class User(Model):
+class User(BaseModel):
     username = CharField(unique=True)
     displayname = CharField()
     password = CharField()
-    relationship = ForeignKeyField(Relationship)
+    relationship = ForeignKeyField(Relationship, null=True)
 
     def sha1hash(self, salt, string):
         """ Generate sha1 hash from salt+string
@@ -52,22 +61,47 @@ class User(Model):
         algo, salt, hsh = self.password.split('$')
         return hsh == self.sha1hash(salt, raw_password)
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'displayname': self.displayname
+        }
+
     class Meta:
         database = db
 
 
-class Post(Model):
+class Content(BaseModel):
     text = TextField()
     author = ForeignKeyField(User)
-    created = DateTimeField(datetime.datetime.now)
-    image = CharField()
+    created = DateTimeField(default=datetime.datetime.now)
     visible = BooleanField(default=True)
+
+    def to_dict(self):
+        return {
+            'text': self.text,
+            'created': str(self.created),
+            'author': self.author.to_dict()
+        }
 
     class Meta:
         database = db
 
 
-class Likes(Model):
+class Post(Content):
+    image = CharField(null=True)
+
+    def to_dict(self):
+        obj = super(Post, self).to_dict()
+        obj.update({'image': self.image})
+        return obj
+
+
+class Comment(Content):
+    anchor = ForeignKeyField(Post)
+
+
+class Like(BaseModel):
     user = ForeignKeyField(User)
     post = ForeignKeyField(Post)
 
