@@ -1,4 +1,4 @@
-# Sommerakademie µBlog aka Skynet
+# SOAK Skynet 2.0
 
 ### Configuration
 
