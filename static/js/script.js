@@ -1,3 +1,5 @@
+var user_id = 1;
+
 function Socket(){
     this.socket = io.connect('http://' + document.domain + ':' + location.port);
     this.socket.onopen = function(){
@@ -20,6 +22,39 @@ function Socket(){
 
 var ws = new Socket();
 
+var LikeButton = React.createClass({
+    toggleLike: function(){
+        var likes = this.props.likes;
+        if(likes.indexOf(user_id) > -1){
+            likes.splice(likes.indexOf(user_id), 1);
+        } else {
+            likes.push(user_id);
+        }
+        this.props.likes = likes;
+        ws.send('like', {
+            post_id: this.props.postId,
+            user_id: user_id
+        });
+    },
+    render: function(){
+        var like = this.props.likes.indexOf(user_id) > -1;
+        var classes = React.addons.classSet({
+            'btn btn-sm': true,
+            'btn-primary': like,
+            'btn-primary-outline': !like
+        });
+        var number = this.props.likes.length || '';
+        return(
+            <a
+                className={classes}
+                onClick={this.toggleLike}
+                >
+                &hearts; {number}
+            </a>
+        )
+    }
+});
+
 var PostList = React.createClass({
     getInitialState: function(){
         return {
@@ -31,7 +66,6 @@ var PostList = React.createClass({
         if(data.posts){
             var posts = this.state.posts.concat(data.posts);
             this.setState({posts: posts});
-            console.log({received: data.posts.length});
             if(data.posts.length >= 10){
                 this.loading = false;
             }
@@ -45,6 +79,23 @@ var PostList = React.createClass({
             posts.unshift(data.post);
             this.setState({posts: posts});
         };
+        if(data.like){
+            var posts = this.state.posts;
+            for(key in posts){
+                var p = posts[key];
+                if(p.id === data.like.post_id){
+                    if(p.likes.indexOf(data.like.user_id) > -1 && !data.like.state){
+                        p.likes.splice(p.likes.indexOf(data.like.user_id), 1);
+                    } else if(p.likes.indexOf(data.like.user_id) < 0 && data.like.state) {
+                        p.likes.push(data.like.user_id);
+                    }
+                    this.setState({
+                        posts: posts
+                    });
+                    return;
+                }
+            }
+        }
     },
     componentDidMount: function(){
         ws.target = this;
@@ -55,7 +106,6 @@ var PostList = React.createClass({
             page: Math.floor(this.state.posts.length / 10) + 1,
             rows: 10
         };
-        console.log(data);
         ws.send('get_page', data);
     },
     loading: false,
@@ -64,19 +114,19 @@ var PostList = React.createClass({
         var windowSize     = window.innerHeight;
         var bodyHeight     = document.body.scrollHeight;
         var distanceBottom = bodyHeight - (scrollPosition + windowSize);
-        if(distanceBottom < 300 && !this.loading){
+        if(distanceBottom < 300 && !this.loading && !(this.state.posts.length % 10)){
             this.loadPosts();
             this.loading = true;
         }
     },
     render: function(){
-        var posts = [];
+        var postViews = [];
         for(key in this.state.posts){
             var post = this.state.posts[key];
             var title = post.title;
             var img = <div className="img">{post.image}</div>;
             var created = new Date(post.created);
-            posts.push(
+            postViews.push(
                 <div className="row post" key={key}>
                     <div className="col-md-8 col-md-offset-2">
                         <div className="card">
@@ -86,6 +136,9 @@ var PostList = React.createClass({
                             {img}
                             <div className="card-block">
                                 <p>{post.text}</p>
+                                <div className="buttons">
+                                    <LikeButton postId={post.id} likes={post.likes} />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -106,7 +159,7 @@ var PostList = React.createClass({
                 <button onClick={addPost}>
                     Add Post
                 </button>
-                {posts}
+                {postViews}
             </div>
         );
     }

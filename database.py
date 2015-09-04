@@ -106,8 +106,17 @@ class Like(BaseModel):
     user = ForeignKeyField(User)
     post = ForeignKeyField(Post)
 
+    def to_dict(self):
+        return {
+            'post_id': self.post.id,
+            'user_id': self.user.id
+        }
+
     class Meta:
         database = db
+        indexes = (
+            (('user', 'post'), True),
+        )
 
 
 db.connect()
