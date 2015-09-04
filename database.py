@@ -79,6 +79,7 @@ class Content(BaseModel):
 
     def to_dict(self):
         return {
+            'id': self.id,
             'text': self.text,
             'created': str(self.created),
             'author': self.author.to_dict()
