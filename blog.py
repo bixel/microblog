@@ -1,7 +1,15 @@
 #! /usr/bin/env python2
+# coding: utf-8
 from __future__ import unicode_literals
 
 from flask import (Flask,
+                   request,
+                   make_response,
+                   session,
+                   jsonify,
+                   redirect,
+                   flash,
+                   url_for,
                    render_template)
 from flask.ext.socketio import SocketIO, send
 from peewee import JOIN_LEFT_OUTER
@@ -11,12 +19,58 @@ import json
 
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
+app.config['DEBUG'] = True
 socketio = SocketIO(app)
 
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
+
+
+@app.route('/login/', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        try:
+            user = User.get(User.username == username)
+            if user.check_password(password):
+                session['user_id'] = user.id
+                return make_response(redirect(url_for('index')))
+            else:
+                flash('Möp')
+        except:
+            flash('Möööp')
+    return render_template('login.html')
+
+
+@app.route('/logout/')
+def logout():
+    session.clear()
+    return make_response(redirect(url_for('index')))
+
+
+@app.route('/api/<function>/', methods=['GET', 'POST'])
+def api(function):
+    if function == 'login':
+        data = request.get_json(force=True)
+        try:
+            user = User.get(User.username == data['username'])
+            if user.check_password(data['password']):
+                status = 'Success'
+                code = 200
+                session['user_id'] = user.id
+            else:
+                status = 'Forbidden'
+                code = 401
+        except:
+            status = 'Failure'
+            code = 404
+        return make_response(jsonify(status=status), code)
+    if function == 'logout':
+        session.clear()
+        return make_response(jsonify(status='Success'), 200)
 
 
 @socketio.on('get_page')
@@ -49,28 +103,30 @@ def get_page(data):
 
 @socketio.on('new_post')
 def new_post(data):
-    user = User.get(id=data['user_id'])
-    p = Post.create(author=user, text=data['text'])
-    pObj = p.to_dict()
-    pObj.update({
-        'comments': [],
-        'likes': []
-    })
-    send(json.dumps({'post': pObj}), broadcast=True)
+    print(session)
+    if 'user_id' in session:
+        user = User.get(id=session['user_id'])
+        p = Post.create(author=user, text=data['text'])
+        pObj = p.to_dict()
+        pObj.update({
+            'comments': [],
+            'likes': []
+        })
+        send(json.dumps({'post': pObj}), broadcast=True)
 
 
 @socketio.on('like')
 def like(data):
     state = False
     try:
-        Like.create(post=data['post_id'], user=data['user_id'])
+        Like.create(post=data['post_id'], user=session['user_id'])
         state = True
     except:
-        l = Like.get(post=data['post_id'], user=data['user_id'])
+        l = Like.get(post=data['post_id'], user=session['user_id'])
         l.delete_instance()
     send(json.dumps({'like': {
         'post_id': data['post_id'],
-        'user_id': data['user_id'],
+        'user_id': session['user_id'],
         'state': state
     }}), broadcast=True)
 

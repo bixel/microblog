@@ -68,6 +68,8 @@ var PostList = React.createClass({
             this.setState({posts: posts});
             if(data.posts.length >= 10){
                 this.loading = false;
+            } else {
+                this.reachedLastPage = true;
             }
         };
         if(data.post){
@@ -109,12 +111,14 @@ var PostList = React.createClass({
         ws.send('get_page', data);
     },
     loading: false,
+    reachedLastPage: false,
     approachingBottom: function(e){
         var scrollPosition = window.pageYOffset;
         var windowSize     = window.innerHeight;
         var bodyHeight     = document.body.scrollHeight;
         var distanceBottom = bodyHeight - (scrollPosition + windowSize);
-        if(distanceBottom < 300 && !this.loading && !(this.state.posts.length % 10)){
+        if(distanceBottom < 300 && !this.loading && !this.reachedLastPage){
+            console.log('Loading');
             this.loadPosts();
             this.loading = true;
         }
