@@ -51,32 +51,10 @@ def logout():
     return make_response(redirect(url_for('index')))
 
 
-@app.route('/api/<function>/', methods=['GET', 'POST'])
-def api(function):
-    if function == 'login':
-        data = request.get_json(force=True)
-        try:
-            user = User.get(User.username == data['username'])
-            if user.check_password(data['password']):
-                status = 'Success'
-                code = 200
-                session['user_id'] = user.id
-            else:
-                status = 'Forbidden'
-                code = 401
-        except:
-            status = 'Failure'
-            code = 404
-        return make_response(jsonify(status=status), code)
-    if function == 'logout':
-        session.clear()
-        return make_response(jsonify(status='Success'), 200)
-
-
-@socketio.on('get_page')
-def get_page(data):
-    if 'page' not in data:
-        data['page'] = 1
+@socketio.on('get_posts')
+def get_posts(data):
+    if 'offset' not in data:
+        data['offset'] = 0
     if 'rows' not in data:
         data['rows'] = 10
     query = (Post
@@ -84,9 +62,9 @@ def get_page(data):
              .join(Comment, JOIN_LEFT_OUTER)
              .switch(Post)
              .join(Like, JOIN_LEFT_OUTER)
-             .aggregate_rows()
              .order_by(Post.id.desc())
-             .paginate(data['page'], data['rows']))
+             .offset(data['offset'])
+             .limit(data['rows']))
     postObjects = []
     for p in query:
         comments = [c.to_dict() for c in p.comment_set]
@@ -129,6 +107,14 @@ def like(data):
         'user_id': session['user_id'],
         'state': state
     }}), broadcast=True)
+
+
+@socketio.on('auth')
+def is_authenticated(data):
+    if('user_id' in session):
+        send(json.dumps({
+            'user_id': session['user_id']
+        }))
 
 
 if __name__ == '__main__':
