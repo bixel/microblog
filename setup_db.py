@@ -26,9 +26,11 @@ db.create_tables([
 
 r = Relationship.create(title='Looking for an adventure...')
 
-u = User(username='kevin', displayname='kevin', relationship=r)
-u.set_password('123')
-u.save()
+for username, password in [['kevin', '123'], ['nico', 'abc']]:
+    print(username, password)
+    u = User(username=username, displayname=username, relationship=r)
+    u.set_password(password)
+    u.save()
 
 p = Post.create(text='Juhu ein erster, sehr sinnvoller Post!',
                 author=u)
