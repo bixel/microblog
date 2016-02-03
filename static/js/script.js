@@ -46,11 +46,60 @@ var LikeButton = React.createClass({
     }
 });
 
+var NewPost = React.createClass({
+    getInitialState: function(){
+        return {
+            text: ''
+        }
+    },
+    handleSubmit: function(){
+        ws.send('new_post', {
+            user_id: this.props.user_id,
+            text: this.state.text
+        });
+        this.props.onCancel();
+    },
+    handleText: function(e){
+        var value = e.currentTarget.value;
+        this.setState({text: value});        
+    },
+    render: function(){
+        return (
+            <div className="row post">
+            <div className="col-md-8 col-md-offset-2">
+            <div className="card">
+            <form onSubmit={this.handleSubmit}>
+                <div className="card-block">
+                    <fieldset className="form-group">
+                        <textarea
+                            className="form-control"
+                            rows="4"
+                            placeholder="Ein neuer Post!"
+                            onChange={this.handleText}
+                        ></textarea>
+                    </fieldset>
+                    <button
+                        type="button"
+                        className="btn btn-warning"
+                        onClick={this.props.onCancel}
+                    >Cancel
+                    </button>&nbsp;
+                    <button type="submit" className="btn btn-primary">Submit</button>
+                </div>
+            </form>
+            </div>
+            </div>
+            </div>
+        )
+    }
+});
+
 var PostList = React.createClass({
     getInitialState: function(){
         return {
             posts: [],
-            user_id: undefined
+            user_id: undefined,
+            addPost: false
         }
     },
     onmessage: function(e){
@@ -99,6 +148,7 @@ var PostList = React.createClass({
         ws.target = this;
         window.addEventListener('scroll', this.approachingBottom, false);
         ws.send('auth');
+        this.loadPosts();
     },
     loadPosts: function(){
         var data = {
@@ -106,6 +156,9 @@ var PostList = React.createClass({
             rows: 10
         };
         ws.send('get_posts', data);
+    },
+    addPost: function(){
+        this.setState({addPost: true});
     },
     loading: false,
     reachedLastPage: false,
@@ -119,6 +172,9 @@ var PostList = React.createClass({
             this.loadPosts();
             this.loading = true;
         }
+    },
+    cancelNewPost: function(){
+        this.setState({addPost: false});
     },
     render: function(){
         var postViews = [];
@@ -146,25 +202,19 @@ var PostList = React.createClass({
                 </div>
             );
         };
-        var addPost = function(){
-            ws.send('new_post', {
-                user_id: this.state.user_id,
-                text: 'Yaaaay a random text.'
-            });
-        }.bind(this);
+        var addPost = this.state.addPost
+            ? <NewPost
+                user_id={this.state.user_id}
+                onCancel={this.cancelNewPost}
+            />
+            : '';
         return (
             <div>
-                <button onClick={this.loadPosts}>
-                    Load Posts
-                </button>
-                <button onClick={addPost}>
-                    Add Post
-                </button>
+                {addPost}
                 {postViews}
             </div>
         );
     }
 })
 
-React.render(<PostList />, document.getElementById('posts-container'));
-
+var postList = React.render(<PostList />, document.getElementById('posts-container'));
