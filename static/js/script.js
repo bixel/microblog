@@ -107,6 +107,12 @@ var PostList = React.createClass({
         console.log(data);
         if(data.posts){
             var posts = this.state.posts.concat(data.posts);
+
+            // Filter duplicates
+            posts = posts.filter(function (e, i, arr) {
+                var ids = arr.map(function(e){ return e.id; });
+                return ids.lastIndexOf(e.id) === i;
+            });
             this.setState({posts: posts});
             if(data.posts.length >= 10){
                 this.loading = false;
