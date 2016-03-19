@@ -198,7 +198,7 @@ var PostList = React.createClass({
         };
         if(data.like){
             var posts = this.state.posts;
-            for(key in posts){
+            for(var key in posts){
                 var p = posts[key];
                 if(p.id === data.like.post_id){
                     if(p.likes.indexOf(data.like.user_id) > -1 && !data.like.state){
@@ -252,7 +252,7 @@ var PostList = React.createClass({
     },
     render: function(){
         var postViews = [];
-        for(key in this.state.posts){
+        for(var key in this.state.posts){
             var post = this.state.posts[key];
             var title = post.title;
             var img = <div className="img">{post.image}</div>;
