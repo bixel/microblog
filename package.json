@@ -1,0 +1,47 @@
+{
+  "name": "microblog",
+  "version": "2.0.0",
+  "description": "A minimal twitter/blog app",
+  "main": "static/js/script.js",
+  "scripts": {
+    "start": "webpack --progress --colors --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bixel/microblog.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bixel/microblog/issues"
+  },
+  "homepage": "https://github.com/bixel/microblog#readme",
+  "devDependencies": {
+    "babel": "^6.5.2",
+    "babel-loader": "^6.2.4",
+    "babel-preset-es2016": "^6.0.11",
+    "babel-preset-react": "^6.5.0",
+    "bootstrap": "^4.0.0-alpha.2",
+    "bootstrap-loader": "^1.0.10",
+    "bootstrap-sass": "^3.3.6",
+    "css-loader": "^0.23.1",
+    "file-loader": "^0.8.5",
+    "imports-loader": "^0.6.5",
+    "node-sass": "^3.7.0",
+    "postcss-loader": "^0.9.1",
+    "resolve-url-loader": "^1.4.3",
+    "sass-loader": "^3.2.0",
+    "style-loader": "^0.13.1",
+    "url-loader": "^0.5.7",
+    "webpack": "^1.13.0"
+  },
+  "dependencies": {
+    "classnames": "^2.2.5",
+    "jquery": "^2.2.3",
+    "react": "^15.0.2",
+    "react-dom": "^15.0.2",
+    "socket.io": "^1.4.6",
+    "tether": "^1.3.2"
+  }
+}

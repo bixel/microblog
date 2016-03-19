@@ -1,3 +1,12 @@
+// include stylesheet
+require('bootstrap-loader');
+require('../css/style.css');
+
+var React = require('react');
+var ReactDOM = require('react-dom');
+var classNames = require('classnames');
+var io = require('socket.io-client');
+
 function Socket(){
     this.socket = io.connect('http://' + document.domain + ':' + location.port);
     this.socket.onopen = function(){
@@ -94,7 +103,7 @@ var LikeButton = React.createClass({
     },
     render: function(){
         var like = this.props.likes.indexOf(this.props.user_id) > -1;
-        var classes = React.addons.classSet({
+        var classes = classNames({
             'btn btn-sm': true,
             'btn-primary': like,
             'btn-primary-outline': !like
@@ -127,7 +136,7 @@ var NewPost = React.createClass({
     },
     handleText: function(e){
         var value = e.currentTarget.value;
-        this.setState({text: value});        
+        this.setState({text: value});
     },
     render: function(){
         return (
@@ -168,7 +177,8 @@ var Post = React.createClass({
       addingNewComment: false
     }
   },
-  toggleComments: function(){
+  toggleComments: function(e){
+    e.preventDefault();
     this.setState({
       showComments: !this.state.showComments
     })
@@ -194,7 +204,7 @@ var Post = React.createClass({
     this.setState({
       addingNewComment: true
     }, function(){
-      this.refs.newCommentInput.getDOMNode().focus();
+      ReactDOM.findDOMNode(this.refs.newCommentInput).focus();
     });
   },
   cancelWritingComment: function(){
@@ -208,7 +218,6 @@ var Post = React.createClass({
     var img = <div className="img">{post.image}</div>;
     var created = new Date(post.created);
 
-    var comments = undefined;
     var newCommentForm = this.state.addingNewComment ? (
       <li className="list-group-item">
         <form onSubmit={this.addComment}>
@@ -237,13 +246,19 @@ var Post = React.createClass({
           className="form-control"
           rows="1"
           placeholder="Drop a comment"
+          onFocus={this.writingComment}
           onClick={this.writingComment}
         ></textarea>
       </li>
     ) : undefined;
+    var commentsNode = undefined;
     if(this.state.showComments){
       var commentViews = [];
-      var comments = this.props.post_object.comments;
+      var comments = this.props.post_object.comments.sort(function(a, b){
+        var dateA = new Date(a.created);
+        var dateB = new Date(b.created);
+        return dateA - dateB;
+      });
       for(var key in comments){
         var commentObj = comments[key];
         var currentComment = (
@@ -251,7 +266,7 @@ var Post = React.createClass({
         );
         commentViews.push(currentComment);
       }
-      comments = (
+      commentsNode = (
         <ul className="list-group list-group-flush">
           {newCommentForm}
           {commentViews}
@@ -259,7 +274,7 @@ var Post = React.createClass({
       )
     }
 
-    var buttonClasses = React.addons.classSet({
+    var buttonClasses = classNames({
         'btn btn-sm': true
     });
     return (
@@ -273,11 +288,19 @@ var Post = React.createClass({
             <div className="card-block">
               <p>{post.text}</p>
               <div className="buttons">
-                <a className={buttonClasses} onClick={this.toggleComments}>{post.comments.length || "No"} Comments</a>
-                <LikeButton postId={post.id} likes={post.likes} user_id={this.props.user_id} />
+                <a
+                  href="#"
+                  className={buttonClasses}
+                  onClick={this.toggleComments}>
+                  {post.comments.length || "No"} Comments
+                </a>
+                <LikeButton
+                  postId={post.id}
+                  likes={post.likes}
+                  user_id={this.props.user_id} />
               </div>
             </div>
-            {comments}
+            {commentsNode}
           </div>
         </div>
       </div>
@@ -363,7 +386,6 @@ var PostList = React.createClass({
             offset: this.state.posts.length,
             rows: 10
         };
-        console.log("Requesting " + data.rows + " new posts, starting from " + data.offset);
         ws.send('get_posts', data);
     },
     addPost: function(){
@@ -408,5 +430,5 @@ var PostList = React.createClass({
     }
 })
 
-var postList = React.render(<PostList />, document.getElementById('posts-container'));
-var navigation = React.render(<Navigation />, document.getElementById('navigation'));
+var postList = ReactDOM.render(<PostList />, document.getElementById('posts-container'));
+var navigation = ReactDOM.render(<Navigation />, document.getElementById('navigation'));

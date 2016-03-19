@@ -81,7 +81,7 @@ class Content(BaseModel):
         return {
             'id': self.id,
             'text': self.text,
-            'created': str(self.created),
+            'created': self.created.isoformat(),
             'author': self.author.to_dict()
         }
 

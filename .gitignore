@@ -1,6 +1,7 @@
 app/config.py
 include/
 app/static/img/upload
+static/js/bundle/
 
 db.sqlite
 
@@ -57,3 +58,4 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+node_modules/

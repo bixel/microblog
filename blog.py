@@ -1,4 +1,4 @@
-#! /usr/bin/env python2
+#! /usr/bin/env python3
 # coding: utf-8
 from __future__ import unicode_literals
 
@@ -11,7 +11,7 @@ from flask import (Flask,
                    flash,
                    url_for,
                    render_template)
-from flask.ext.socketio import SocketIO, send
+from flask_socketio import SocketIO, send
 from database import Post, Comment, User, Like
 import config
 import json
