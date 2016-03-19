@@ -12,7 +12,6 @@ from flask import (Flask,
                    url_for,
                    render_template)
 from flask.ext.socketio import SocketIO, send
-from peewee import JOIN_LEFT_OUTER
 from database import Post, Comment, User, Like
 import config
 import json
@@ -59,10 +58,7 @@ def get_posts(data):
     if 'rows' not in data:
         data['rows'] = 10
     query = (Post
-             .select(Post, Comment, Like)
-             .join(Comment, JOIN_LEFT_OUTER)
-             .switch(Post)
-             .join(Like, JOIN_LEFT_OUTER)
+             .select(Post)
              .order_by(Post.id.desc())
              .offset(data['offset'])
              .limit(data['rows']))
@@ -70,7 +66,6 @@ def get_posts(data):
     for p in query:
         comments = [c.to_dict() for c in p.comment_set]
         likes = [l.user.id for l in p.like_set]
-        print(likes)
         pObj = p.to_dict()
         pObj.update({
             'comments': comments,

@@ -172,6 +172,8 @@ var PostList = React.createClass({
         console.log(data);
         if(data.posts){
             var posts = this.state.posts.concat(data.posts);
+            console.log("Received " + data.posts.length + " posts.");
+            console.log("New size is " + posts.length + " posts.");
 
             // Filter duplicates
             posts = posts.filter(function (e, i, arr) {
@@ -227,6 +229,7 @@ var PostList = React.createClass({
             offset: this.state.posts.length,
             rows: 10
         };
+        console.log("Requesting " + data.rows + " new posts, starting from " + data.offset);
         ws.send('get_posts', data);
     },
     addPost: function(){
@@ -241,8 +244,8 @@ var PostList = React.createClass({
         var distanceBottom = bodyHeight - (scrollPosition + windowSize);
         if(distanceBottom < 300 && !this.loading && !this.reachedLastPage){
             console.log('Loading');
-            this.loadPosts();
             this.loading = true;
+            this.loadPosts();
         }
     },
     cancelNewPost: function(){
