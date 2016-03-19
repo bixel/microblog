@@ -16,9 +16,76 @@ function Socket(){
     this.send = function(event, data){
         this.socket.emit(event, data);
     };
-}
+};
+
+// Event listener for inter-component communication
+var addPostEventlistener = {
+  addPost: function(){
+    if(this.listener){
+      this.listener.addPost();
+    }
+  },
+  listener: undefined
+};
 
 var ws = new Socket();
+
+var Navigation = React.createClass({
+  getInitialState: function(){
+    return {
+      username: undefined
+    }
+  },
+  componentDidMount: function(){
+    this.ws = new Socket();
+    this.ws.target = this;
+    this.ws.send('auth');
+  },
+  onmessage: function(e){
+    var data = JSON.parse(e);
+    if(data.username){
+      this.setState({
+        username: data.username
+      });
+    }
+  },
+  addPost: function(){
+    addPostEventlistener.addPost();
+  },
+  render: function(){
+    var loginLogoutLabel = this.state.username ? "Logout" : "Login";
+    var loginLogoutLink = this.state.username ? "/logout/" : "/login/";
+    var mainNav = this.state.username ? (
+      <ul className="nav navbar-nav">
+        <li className="nav-item">
+          <a className="nav-link" href="#" onClick={this.addPost}>New Post</a>
+        </li>
+      </ul>
+    ) : undefined;
+    var loginInfo = this.state.username ? (
+      <li className="nav-item">
+        <span className="nav-link">Eingeloggt als {this.state.username}</span>
+      </li>
+    ) : undefined;
+    return (
+      <nav className="navbar navbar-fixed-top navbar-light bg-faded">
+        <div className="container">
+          <div className="navbar-header">
+            <a className="navbar-brand" href="/">Skynet2</a>
+          </div>
+          {mainNav}
+          <ul className="nav navbar-nav pull-right">
+            {loginInfo}
+            <li className="nav-item">
+              <a className="nav-link" href={loginLogoutLink}>{loginLogoutLabel}</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    )
+  }
+
+});
 
 var LikeButton = React.createClass({
     toggleLike: function(){
@@ -151,6 +218,7 @@ var PostList = React.createClass({
         };
     },
     componentDidMount: function(){
+        addPostEventlistener.listener = this;
         ws.target = this;
         window.addEventListener('scroll', this.approachingBottom, false);
         ws.send('auth');
@@ -224,3 +292,4 @@ var PostList = React.createClass({
 })
 
 var postList = React.render(<PostList />, document.getElementById('posts-container'));
+var navigation = React.render(<Navigation />, document.getElementById('navigation'));

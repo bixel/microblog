@@ -37,6 +37,7 @@ def login():
             user = User.get(User.username == username)
             if user.check_password(password):
                 session['user_id'] = user.id
+                session['username'] = user.username
                 return make_response(redirect(url_for('index')))
             else:
                 flash('Möp')
@@ -113,7 +114,8 @@ def like(data):
 def is_authenticated(data):
     if('user_id' in session):
         send(json.dumps({
-            'user_id': session['user_id']
+            'user_id': session['user_id'],
+            'username': session['username']
         }))
 
 

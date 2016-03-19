@@ -11,23 +11,7 @@
     <link href="/static/css/style.css" rel="stylesheet">
   </head>
   <body>
-    <nav class="navbar navbar-fixed-top navbar-light bg-faded">
-      <a class="navbar-brand" href="/">Skynet2</a>
-      <ul class="nav navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link" href="#" onclick="postList.setState({addPost: true});">New Post</a>
-        </li>
-      </ul>
-      <ul class="nav navbar-nav pull-right">
-        <li class="nav-item">
-          <a
-            class="nav-link {{ 'active' if request.path == '/login/' else '' }}"
-            href="{{ url_for('logout' if session.user_id else 'login') }}">
-              {{ 'Logout' if session.user_id else 'Login' }}
-          </a>
-        </li>
-      </ul>
-    </nav>
+    <div id="navigation"></div>
     {% block main %}
     <div id="posts-container" class="container main">
     </div>
