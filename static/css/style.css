@@ -14,3 +14,9 @@
     width: 100%;
     max-height: 400px;
 }
+
+.nav-text {
+    display: block;
+    padding-top: .425rem;
+    padding-bottom: .425rem;
+}

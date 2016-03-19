@@ -64,17 +64,15 @@ var Navigation = React.createClass({
     ) : undefined;
     var loginInfo = this.state.username ? (
       <li className="nav-item">
-        <span className="nav-link">Eingeloggt als {this.state.username}</span>
+        <span className="nav-text">Eingeloggt als {this.state.username}</span>
       </li>
     ) : undefined;
     return (
       <nav className="navbar navbar-fixed-top navbar-light bg-faded">
         <div className="container">
-          <div className="navbar-header">
-            <a className="navbar-brand" href="/">Skynet2</a>
-          </div>
+          <a className="navbar-brand" href="/">Skynet2</a>
           {mainNav}
-          <ul className="nav navbar-nav pull-right">
+          <ul className="nav navbar-nav pull-xs-right">
             {loginInfo}
             <li className="nav-item">
               <a className="nav-link" href={loginLogoutLink}>{loginLogoutLabel}</a>
