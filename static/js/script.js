@@ -117,7 +117,8 @@ var NewPost = React.createClass({
             text: ''
         }
     },
-    handleSubmit: function(){
+    handleSubmit: function(e){
+        e.preventDefault();
         ws.send('new_post', {
             user_id: this.props.user_id,
             text: this.state.text
