@@ -101,6 +101,11 @@ class Post(Content):
 class Comment(Content):
     anchor = ForeignKeyField(Post)
 
+    def to_dict(self):
+        obj = super(Comment, self).to_dict()
+        obj.update({'anchor': self.anchor.id})
+        return obj
+
 
 class Like(BaseModel):
     user = ForeignKeyField(User)

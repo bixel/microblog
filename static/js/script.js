@@ -64,7 +64,7 @@ var Navigation = React.createClass({
     ) : undefined;
     var loginInfo = this.state.username ? (
       <li className="nav-item">
-        <span className="nav-text">Eingeloggt als {this.state.username}</span>
+        <span className="nav-text">Logged in as {this.state.username}</span>
       </li>
     ) : undefined;
     return (
@@ -160,6 +160,131 @@ var NewPost = React.createClass({
     }
 });
 
+var Post = React.createClass({
+  getInitialState: function(){
+    return {
+      showComments: false,
+      newCommentText: "",
+      addingNewComment: false
+    }
+  },
+  toggleComments: function(){
+    this.setState({
+      showComments: !this.state.showComments
+    })
+  },
+  handleText: function(e){
+    var value = e.currentTarget.value;
+    this.setState({newCommentText: value});
+  },
+  addComment: function(e){
+    var data = {
+      post_id: this.props.post_object.id,
+      text: this.state.newCommentText,
+      user_id: this.props.user_id
+    }
+    e.preventDefault();
+    ws.send('new_comment', data);
+    this.setState({
+      newCommentText: "",
+      addingNewComment: false
+    });
+  },
+  writingComment: function(){
+    this.setState({
+      addingNewComment: true
+    }, function(){
+      this.refs.newCommentInput.getDOMNode().focus();
+    });
+  },
+  cancelWritingComment: function(){
+    this.setState({
+      addingNewComment: false
+    });
+  },
+  render: function(){
+    var post = this.props.post_object;
+    var title = post.title;
+    var img = <div className="img">{post.image}</div>;
+    var created = new Date(post.created);
+
+    var comments = undefined;
+    var newCommentForm = this.state.addingNewComment ? (
+      <li className="list-group-item">
+        <form onSubmit={this.addComment}>
+          <fieldset className="form-group">
+            <textarea
+              className="form-control"
+              rows="2"
+              placeholder="Drop a comment"
+              onChange={this.handleText}
+              value={this.state.newCommentText}
+              ref="newCommentInput"
+            ></textarea>
+          </fieldset>
+          <button
+            type="button"
+            className="btn btn-sm"
+            onClick={this.cancelWritingComment}
+          >Cancel
+          </button>&nbsp;
+          <button type="submit" className="btn-sm btn">Submit</button>
+        </form>
+      </li>
+    ) : this.props.user_id ? (
+      <li className="list-group-item">
+        <textarea
+          className="form-control"
+          rows="1"
+          placeholder="Drop a comment"
+          onClick={this.writingComment}
+        ></textarea>
+      </li>
+    ) : undefined;
+    if(this.state.showComments){
+      var commentViews = [];
+      var comments = this.props.post_object.comments;
+      for(var key in comments){
+        var commentObj = comments[key];
+        var currentComment = (
+          <li className="list-group-item" key={key}>{commentObj.text}</li>
+        );
+        commentViews.push(currentComment);
+      }
+      comments = (
+        <ul className="list-group list-group-flush">
+          {newCommentForm}
+          {commentViews}
+        </ul>
+      )
+    }
+
+    var buttonClasses = React.addons.classSet({
+        'btn btn-sm': true
+    });
+    return (
+      <div className="row post">
+        <div className="col-md-8 col-md-offset-2">
+          <div className="card">
+            <div className="card-header text-xs-right text-muted">
+              #{post.id} {created.toLocaleString()} von {post.author.displayname}
+            </div>
+            {img}
+            <div className="card-block">
+              <p>{post.text}</p>
+              <div className="buttons">
+                <a className={buttonClasses} onClick={this.toggleComments}>{post.comments.length || "No"} Comments</a>
+                <LikeButton postId={post.id} likes={post.likes} user_id={this.props.user_id} />
+              </div>
+            </div>
+            {comments}
+          </div>
+        </div>
+      </div>
+    )
+  }
+});
+
 var PostList = React.createClass({
     getInitialState: function(){
         return {
@@ -196,6 +321,14 @@ var PostList = React.createClass({
             }
             posts.unshift(data.post);
             this.setState({posts: posts});
+        };
+        if(data.comment){
+          var posts = this.state.posts;
+          var matchingIndex = posts.findIndex(function(e, i, a){
+            return e.id === data.comment.anchor;
+          });
+          posts[matchingIndex].comments.unshift(data.comment);
+          this.setState({posts: posts});
         };
         if(data.like){
             var posts = this.state.posts;
@@ -256,26 +389,8 @@ var PostList = React.createClass({
         var postViews = [];
         for(var key in this.state.posts){
             var post = this.state.posts[key];
-            var title = post.title;
-            var img = <div className="img">{post.image}</div>;
-            var created = new Date(post.created);
             postViews.push(
-                <div className="row post" key={key}>
-                    <div className="col-md-8 col-md-offset-2">
-                        <div className="card">
-                            <div className="card-header text-right text-muted">
-                                #{post.id} {created.toLocaleString()} von {post.author.displayname}
-                            </div>
-                            {img}
-                            <div className="card-block">
-                                <p>{post.text}</p>
-                                <div className="buttons">
-                                    <LikeButton postId={post.id} likes={post.likes} user_id={this.state.user_id} />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <Post post_object={post} key={key} user_id={this.state.user_id} />
             );
         };
         var addPost = this.state.addPost

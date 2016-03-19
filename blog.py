@@ -89,6 +89,17 @@ def new_post(data):
         send(json.dumps({'post': pObj}), broadcast=True)
 
 
+@socketio.on('new_comment')
+def new_comment(data):
+    if 'user_id' in session:
+        user = User.get(id=session['user_id'])
+        c = Comment.create(author=user,
+                           text=data['text'],
+                           anchor=data['post_id'])
+        cObj = c.to_dict()
+        send(json.dumps({'comment': cObj}), broadcast=True)
+
+
 @socketio.on('like')
 def like(data):
     state = False
